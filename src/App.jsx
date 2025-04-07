@@ -171,14 +171,14 @@ export default function App() {
             {mode === "driver" ? "DRIVER MODE" : "USER MODE"}
           </button>
 
-          {mode === "driver" && (
+          {/* {mode === "driver" && (
             <button 
               className="update-button"
               onClick={updateLocation}
             >
               Update Location
             </button>
-          )}
+          )} */}
         </div>
       </div>
 
