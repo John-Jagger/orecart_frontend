@@ -68,29 +68,39 @@ export default function App() {
 
   // WebSocket connection
   useEffect(() => {
-    // Conexión WebSocket a la API de ORECART
-    const socketUrl = "wss://tracker-backendgun.onrender.com/ws/location/";
-    const ws = new WebSocket(socketUrl);
-    
-    ws.onopen = () => {
-      console.log("WebSocket conectado");
-      ws.send(JSON.stringify({ user_id: "unknown" })); // Iniciar la conexión WebSocket
-      if (mode === "driver") startLocationSharing();
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (mode === "user") {
-        setPosition([data.latitude, data.longitude]);
+    let watchId;
+  
+    if (mode === "driver") {
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setPosition([latitude, longitude]);
+  
+          if (socketRef.current?.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({
+              user_id: "unknown",
+              latitude,
+              longitude,
+              mode: "driver"
+            }));
+          }
+        },
+        (err) => {
+          console.error("Error watching position:", err);
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 10000,
+          timeout: 5000,
+        }
+      );
+    }
+  
+    return () => {
+      if (watchId !== undefined) {
+        navigator.geolocation.clearWatch(watchId);
       }
     };
-
-    ws.onerror = (error) => console.error("Error WebSocket:", error);
-    ws.onclose = () => console.log("WebSocket desconectado");
-
-    socketRef.current = ws;
-
-    return () => ws.close();
   }, [mode]);
 
   // Función para enviar ubicación del conductor
