@@ -6,7 +6,6 @@ import L from "leaflet";
 
 const DEFAULT_CENTER = [39.747389, -105.224338];
 
-// Configuración de rutas
 const ROUTE_CONFIG = {
   silver: {
     waypoints: [
@@ -22,29 +21,8 @@ const ROUTE_CONFIG = {
     color: "#C0C0C0",
     name: "Silver"
   },
-  // gold: {
-  //   waypoints: [
-  //     [39.750935, -105.223237],
-  //     [39.753907, -105.226313],
-  //     [39.756039, -105.222487],
-  //     [39.757543, -105.223379],
-  //     [39.756377, -105.225459],
-  //     [39.756196, -105.230609],
-  //     [39.755357, -105.232509],
-  //     [39.754936, -105.234001],
-  //     [39.763007, -105.225173],
-  //     [39.766196, -105.228185],
-  //     [39.766094, -105.233333],
-  //     [39.765772, -105.231512],
-  //     [39.754295, -105.221145],
-  //     [39.750935, -105.223237],
-  //   ],
-  //   color: "#FFD700",
-  //   name: "Gold"
-  //}
 };
 
-// Iconos
 const createIcon = (url, size, anchor) => new L.Icon({
   iconUrl: url,
   iconSize: size,
@@ -62,74 +40,105 @@ export default function App() {
   const [position, setPosition] = useState(DEFAULT_CENTER);
   const [mode, setMode] = useState("user");
   const socketRef = useRef(null);
+  const watchIdRef = useRef(null);
 
-  // Obtener configuración de ruta actual
   const currentRoute = ROUTE_CONFIG[selectedRoute];
 
-  // WebSocket connection
-  useEffect(() => {
-    let watchId;
-  
-    if (mode === "driver") {
-      watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setPosition([latitude, longitude]);
-  
-          if (socketRef.current?.readyState === WebSocket.OPEN) {
-            socketRef.current.send(JSON.stringify({
-              user_id: "unknown",
-              latitude,
-              longitude,
-              mode: "driver"
-            }));
-          }
-        },
-        (err) => {
-          console.error("Error watching position:", err);
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 10000,
-          timeout: 5000,
-        }
-      );
-    }
-  
-    return () => {
-      if (watchId !== undefined) {
-        navigator.geolocation.clearWatch(watchId);
-      }
-    };
-  }, [mode]);
-
-  // Función para enviar ubicación del conductor
-  const updateLocation = () => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const { latitude, longitude } = pos.coords;
-      setPosition([latitude, longitude]);
-      if (socketRef.current?.readyState === WebSocket.OPEN) {
-        socketRef.current.send(JSON.stringify({
-          user_id: "unknown", // id de usuario
-          latitude,
-          longitude,
-          mode: "driver"
-        }));
-      }
-    });
-  };
-
-  // Obtener los últimos datos de la ubicación al cargar la app.
+  // Fetch last known location on load
   useEffect(() => {
     fetch("https://tracker-backendgun.onrender.com/api/location/")
       .then((res) => res.json())
       .then((data) => {
-        setPosition([data.latitude, data.longitude]);
+        if (data.latitude && data.longitude) {
+          console.log("📍 Loaded last known location:", data);
+          setPosition([data.latitude, data.longitude]);
+        }
       })
-      .catch((error) => console.error("Error al obtener ubicación inicial:", error));
+      .catch((err) => console.error("Error loading last known location:", err));
   }, []);
 
-  // Obtener datos de la ruta
+  // Connect WebSocket (with auto-reconnect)
+  useEffect(() => {
+    let ws;
+    let shouldReconnect = true;
+
+    const connectWebSocket = () => {
+      console.log("🔌 Connecting WebSocket...");
+      ws = new WebSocket("wss://tracker-backendgun.onrender.com/ws/location/");
+
+      ws.onopen = () => {
+        console.log("✅ WebSocket connected");
+        ws.send(JSON.stringify({ user_id: "unknown" }));
+        if (mode === "driver") {
+          startLocationSharing();
+        }
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (mode === "user" && data.latitude && data.longitude) {
+          setPosition([data.latitude, data.longitude]);
+        }
+      };
+
+      ws.onerror = (err) => console.error("WebSocket error:", err);
+
+      ws.onclose = () => {
+        console.warn("⚠️ WebSocket closed");
+        if (shouldReconnect) {
+          setTimeout(connectWebSocket, 5000); // Try again in 5 seconds
+        }
+      };
+
+      socketRef.current = ws;
+    };
+
+    connectWebSocket();
+
+    return () => {
+      shouldReconnect = false;
+      ws?.close();
+    };
+  }, [mode]);
+
+  // Watch location if in driver mode
+  useEffect(() => {
+    if (mode === "driver") {
+      if (navigator.geolocation) {
+        watchIdRef.current = navigator.geolocation.watchPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            setPosition([latitude, longitude]);
+
+            if (socketRef.current?.readyState === WebSocket.OPEN) {
+              socketRef.current.send(JSON.stringify({
+                user_id: "unknown",
+                latitude,
+                longitude,
+                mode: "driver"
+              }));
+            }
+          },
+          (err) => console.error("Geo error:", err),
+          { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
+        );
+      }
+    } else {
+      if (watchIdRef.current) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    }
+
+    return () => {
+      if (watchIdRef.current) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, [mode]);
+
+  // Load route (or fallback to config)
   useEffect(() => {
     fetch(`/${selectedRoute}-route.json`)
       .then((res) => res.json())
@@ -137,8 +146,8 @@ export default function App() {
         setRoute(data.route || currentRoute.waypoints);
         setTimes((data.route || currentRoute.waypoints).map(() => Math.floor(Math.random() * 10) + 1));
       })
-      .catch((error) => {
-        console.error("Error cargando la ruta:", error);
+      .catch((err) => {
+        console.warn("Fallback to hardcoded route due to fetch error:", err);
         setRoute(currentRoute.waypoints);
         setTimes(currentRoute.waypoints.map(() => Math.floor(Math.random() * 10) + 1));
       });
@@ -148,25 +157,13 @@ export default function App() {
     <div className="app-container">
       <div className="top-bar">
         <span className="title">ORECART</span>
-      <button
-      className="report-button"
-      onClick={() => window.open("https://docs.google.com/forms/d/e/1FAIpQLSe7nRbh6Vp9wmA-PTlPgbShxyE5fXBfWK5n0zX_1kMQ2D1luA/viewform?usp=header", "_blank")}
-    >
-      Report Issue
-    </button>
+        <button
+          className="report-button"
+          onClick={() => window.open("https://docs.google.com/forms/d/e/1FAIpQLSe7nRbh6Vp9wmA-PTlPgbShxyE5fXBfWK5n0zX_1kMQ2D1luA/viewform?usp=header", "_blank")}
+        >
+          Report Issue
+        </button>
         <div className="controls">
-          {/* <select 
-            value={selectedRoute}
-            onChange={(e) => setSelectedRoute(e.target.value)}
-            className="route-select"
-          >
-            {Object.keys(ROUTE_CONFIG).map(route => (
-              <option key={route} value={route}>
-                {ROUTE_CONFIG[route].name} Route
-              </option>
-            ))}
-          </select> */}
-
           <button
             className={`mode-toggle ${mode === 'driver' ? 'driver' : ''}`}
             onClick={() => {
@@ -180,15 +177,6 @@ export default function App() {
           >
             {mode === "driver" ? "DRIVER MODE" : "USER MODE"}
           </button>
-
-          {/* {mode === "driver" && (
-            <button 
-              className="update-button"
-              onClick={updateLocation}
-            >
-              Update Location
-            </button>
-          )} */}
         </div>
       </div>
 
@@ -200,9 +188,9 @@ export default function App() {
 
         {route.length > 0 && (
           <Polyline
-            key={selectedRoute} // Forzamos re-render al cambiar la ruta
+            key={selectedRoute}
             positions={route}
-            color={currentRoute.color} // Aplicamos el color correcto
+            color={currentRoute.color}
             weight={5}
             interactive={false}
           />
@@ -219,7 +207,6 @@ export default function App() {
               fillOpacity={1}
             />
             <Marker position={point} icon={stopIcon}>
-            {/* {times[index]} mins */}
               <Popup>{currentRoute.name} - Stop</Popup>
             </Marker>
           </div>
