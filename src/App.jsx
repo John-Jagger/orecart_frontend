@@ -22,26 +22,26 @@ const ROUTE_CONFIG = {
     color: "#C0C0C0",
     name: "Silver"
   },
-  gold: {
-    waypoints: [
-      [39.750935, -105.223237],
-      [39.753907, -105.226313],
-      [39.756039, -105.222487],
-      [39.757543, -105.223379],
-      [39.756377, -105.225459],
-      [39.756196, -105.230609],
-      [39.755357, -105.232509],
-      [39.754936, -105.234001],
-      [39.763007, -105.225173],
-      [39.766196, -105.228185],
-      [39.766094, -105.233333],
-      [39.765772, -105.231512],
-      [39.754295, -105.221145],
-      [39.750935, -105.223237],
-    ],
-    color: "#FFD700",
-    name: "Gold"
-  }
+  // gold: {
+  //   waypoints: [
+  //     [39.750935, -105.223237],
+  //     [39.753907, -105.226313],
+  //     [39.756039, -105.222487],
+  //     [39.757543, -105.223379],
+  //     [39.756377, -105.225459],
+  //     [39.756196, -105.230609],
+  //     [39.755357, -105.232509],
+  //     [39.754936, -105.234001],
+  //     [39.763007, -105.225173],
+  //     [39.766196, -105.228185],
+  //     [39.766094, -105.233333],
+  //     [39.765772, -105.231512],
+  //     [39.754295, -105.221145],
+  //     [39.750935, -105.223237],
+  //   ],
+  //   color: "#FFD700",
+  //   name: "Gold"
+  //}
 };
 
 // Iconos
@@ -138,6 +138,12 @@ export default function App() {
     <div className="app-container">
       <div className="top-bar">
         <span className="title">ORECART</span>
+      <button
+      className="report-button"
+      onClick={() => window.open("https://docs.google.com/forms/d/e/1FAIpQLSe7nRbh6Vp9wmA-PTlPgbShxyE5fXBfWK5n0zX_1kMQ2D1luA/viewform?usp=header", "_blank")}
+    >
+      Report Issue
+    </button>
         <div className="controls">
           <select 
             value={selectedRoute}
@@ -158,7 +164,7 @@ export default function App() {
                 setMode("user");
               } else {
                 const password = prompt("Password:");
-                if (password === "1234") setMode("driver");
+                if (password === "orecartS1") setMode("driver");
               }
             }}
           >
@@ -203,7 +209,8 @@ export default function App() {
               fillOpacity={1}
             />
             <Marker position={point} icon={stopIcon}>
-              <Popup>{currentRoute.name} - {times[index]} mins</Popup>
+            {/* {times[index]} mins */}
+              <Popup>{currentRoute.name} - Stop</Popup>
             </Marker>
           </div>
         ))}
