@@ -145,7 +145,7 @@ export default function App() {
       Report Issue
     </button>
         <div className="controls">
-          <select 
+          {/* <select 
             value={selectedRoute}
             onChange={(e) => setSelectedRoute(e.target.value)}
             className="route-select"
@@ -155,7 +155,7 @@ export default function App() {
                 {ROUTE_CONFIG[route].name} Route
               </option>
             ))}
-          </select>
+          </select> */}
 
           <button
             className={`mode-toggle ${mode === 'driver' ? 'driver' : ''}`}

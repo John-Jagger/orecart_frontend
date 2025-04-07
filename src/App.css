@@ -58,7 +58,8 @@ html, body, #root, .map-container {
 
 .report-button {
   margin-left: 1px;
-  padding: 8px 12px;
+  padding: 6px 10px;
+  font-size: 10;
   background-color: #dc3545;
   color: #fff;
   border: none;
