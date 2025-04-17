@@ -1,12 +1,5 @@
-.news-section {
-    margin-top: 40px;
-    padding: 30px 20px;
-    background-color: #f9f9f9; 
-    color: #333;
-    min-height: 90vh;
-}
-
 .news-section h2 {
+    min-height: 90vh;
     margin-bottom: 10px;
     font-size: 1.8rem;
 }
