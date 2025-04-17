@@ -1,0 +1,47 @@
+
+  .map {
+    position: absolute;
+    top: 50px; /* Ajusta según la altura de la barra */
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  
+  
+  .driver-button {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .driver-button img {
+    width: 30px;
+    height: 30px;
+    margin-right: 8px;
+  }
+  
+  
+  .report-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    background-color: #0c52e9;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s;
+  }
+  
+  .report-button:hover {
+    background-color: #0c4cd6;
+  }

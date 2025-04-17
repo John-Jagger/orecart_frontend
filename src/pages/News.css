@@ -1,0 +1,45 @@
+.news-section {
+    margin-top: 40px;
+    padding: 30px 20px;
+    background-color: #f9f9f9; 
+    color: #333;
+    min-height: 90vh;
+}
+
+.news-section h2 {
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+}
+
+.news-section h1 {
+    margin-bottom: 10px;
+    font-size: 2rem;
+}
+
+
+.news-section  p {
+    text-indent: 2em;
+    line-height: 0.5;
+    font-size: 1rem;
+}
+
+.tracker-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    background-color: #ff9900;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s;
+  }
+  
+  .tracker-button:hover {
+    background-color: #ca7900;
+  }
