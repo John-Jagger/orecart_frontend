@@ -21,7 +21,7 @@ export default function App() {
             <p> work with the orecart shuttle team to make this happen we couldn't keep it up due to our very small budget. We were not funded by anyone to</p>
             <p> do this and as such could only afford to track the orecart to a limited time. We are still looking for other ways to help fund this student</p>
             <p> project but as of this moment we do not have any concrete solutions. This doesn't mean the orecart tracker is down for good, we hope to find </p>
-            <p>some more funding soon and add new features to it (gold, tungsten routes with more carts)</p>
+            <p>some more funding soon and add new features to it (gold, tungsten routes, with 2 carts per route)</p>
             <p>Sincerely,  </p>
             <p>The Ore Cart Tracker Team</p>
         </div>
