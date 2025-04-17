@@ -11,15 +11,7 @@ const DEFAULT_CENTER = [39.747389, -105.224338];
 export default function App() {
     const navigate = useNavigate();
   return (
-    <div 
-      className="app-container"
-      style={{
-        backgroundColor: "#ffffff",  // white background
-        color: "#000000",            // black text
-        minHeight: "100vh",          // fill screen height
-        paddingTop: "2rem" 
-      }}
-    >
+    <div className="app-container">
       <div className="top-bar">
         <span className="title">ORECART</span>
         </div>

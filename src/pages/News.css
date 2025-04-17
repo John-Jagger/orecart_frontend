@@ -1,3 +1,10 @@
+.app-container {
+    background-color: white;
+    color: black;
+    min-height: 100vh;
+    padding-top: 2rem;
+}
+
 .news-section h2 {
     min-height: 90vh;
     margin-bottom: 10px;
