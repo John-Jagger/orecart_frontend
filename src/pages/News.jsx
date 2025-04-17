@@ -24,7 +24,7 @@ export default function App() {
           support live tracking for a limited time.
         </p>
         <p>
-          We’re currently exploring options to secure funding so we can bring the tracker back — better
+          We’re currently exploring options to secure funding so we can bring the tracker back, better
           than ever. That includes support for more routes like Gold and Tungsten, with two carts per route!
         </p>
         <p>
